@@ -33,4 +33,9 @@ build/
 .vscode/
 
 ### ENV ###
-env.properties
+.env.properties
+.env.properties
+.env.properties
+*.properties
+.env.properties
+.env.properties
