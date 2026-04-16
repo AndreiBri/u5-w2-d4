@@ -4,8 +4,11 @@ import andreibri.u5_w2_d3.entities.BlogPost;
 import andreibri.u5_w2_d3.payloads.BlogPostRequest;
 import andreibri.u5_w2_d3.services.BlogPostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,9 +19,12 @@ public class BlogPostController {
     @Autowired
     private BlogPostService service;
 
-    @PostMapping
-    public BlogPost create(@RequestBody BlogPostRequest req) {
-        return service.create(req);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public BlogPost create(
+            @RequestPart("data") BlogPostRequest req,
+            @RequestPart("cover") MultipartFile file) throws IOException {
+
+        return service.create(req, file);
     }
 
     @GetMapping
