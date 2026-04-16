@@ -4,34 +4,35 @@ import andreibri.u5_w2_d3.entities.Author;
 import andreibri.u5_w2_d3.payloads.AuthorRequest;
 import andreibri.u5_w2_d3.repository.AuthorRepository;
 import exceptions.NotFoundException;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Setter
 @Service
 public class AuthorService {
 
     @Autowired
     private AuthorRepository authorRepo;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
-    public Author create(AuthorRequest req) {
-        Author a = new Author();
-        a.setFirstName(req.firstName);
-        a.setLastName(req.lastName);
-        a.setEmail(req.email);
-        a.setBirthDate(req.birthDate);
-        a.setAvatar("https://ui-avatars.com/api/?name="
-                + req.firstName + "+" + req.lastName);
+    public Author create(AuthorRequest req, MultipartFile file) throws IOException {
 
-        return authorRepo.save(a);
+        String avatarUrl = cloudinaryService.upload(file);
 
+        Author author = new Author();
+        author.setFirstName(req.getFirstName());
+        author.setLastName(req.getLastName());
+        author.setEmail(req.getEmail());
+        author.setBirthDate(req.getBirthDate());
+        author.setAvatar(avatarUrl);
+
+        return authorRepo.save(author);
     }
 
     public List<Author> getAll() {
@@ -45,11 +46,14 @@ public class AuthorService {
 
     public Author update(UUID id, AuthorRequest req) {
         Author existing = this.getById(id);
-        existing.setFirstName(req.firstName);
-        existing.setLastName(req.lastName);
-        existing.setEmail(req.email);
-        existing.setBirthDate(req.birthDate);
-        existing.setAvatar("https://ui-avatars.com/api/?name=" + req.firstName + "+" + req.lastName);
+
+        existing.setFirstName(req.getFirstName());
+        existing.setLastName(req.getLastName());
+        existing.setEmail(req.getEmail());
+        existing.setBirthDate(req.getBirthDate());
+        existing.setAvatar("https://ui-avatars.com/api/?name="
+                + req.getFirstName() + "+" + req.getLastName());
+
         return authorRepo.save(existing);
     }
 
@@ -57,4 +61,16 @@ public class AuthorService {
         authorRepo.deleteById(id);
     }
 
+    public Author uploadAvatar(UUID id, MultipartFile file) throws IOException {
+
+        Author author = this.getById(id);
+
+        String avatarUrl = cloudinaryService.upload(file);
+
+        author.setAvatar(avatarUrl);
+
+        System.out.println(author);
+        return authorRepo.save(author);
+
+    }
 }

@@ -46,4 +46,12 @@ public class AuthorController {
     public void delete(@PathVariable UUID id) {
         service.delete(id);
     }
+
+    @PatchMapping(value = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Author uploadAvatar(
+            @PathVariable UUID id,
+            @RequestPart("avatar") MultipartFile file) throws IOException {
+
+        return service.uploadAvatar(id, file);
+    }
 }

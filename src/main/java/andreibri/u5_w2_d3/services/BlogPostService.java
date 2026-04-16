@@ -8,7 +8,9 @@ import andreibri.u5_w2_d3.repository.BlogPostRepository;
 import exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,17 +23,22 @@ public class BlogPostService {
     @Autowired
     private AuthorRepository authorRepo;
 
-    public BlogPost create(BlogPostRequest req) {
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
-        Author author = authorRepo.findById(req.authorId)
-                .orElseThrow(() -> new RuntimeException("Author not found"));
+    public BlogPost create(BlogPostRequest req, MultipartFile file) throws IOException {
+
+        Author author = authorRepo.findById(req.getAuthorId())
+                .orElseThrow(() -> new NotFoundException("Author not found"));
+
+        String coverUrl = cloudinaryService.upload(file);
 
         BlogPost post = new BlogPost();
-        post.setCategory(req.category);
-        post.setTitle(req.title);
-        post.setContent(req.content);
-        post.setReadingTime(req.readingTime);
-        post.setCover("https://picsum.photos/200/300");
+        post.setTitle(req.getTitle());
+        post.setContent(req.getContent());
+        post.setCategory(req.getCategory());
+        post.setReadingTime(req.getReadingTime());
+        post.setCover(coverUrl);
         post.setAuthor(author);
 
         return blogPostRepo.save(post);
@@ -48,13 +55,16 @@ public class BlogPostService {
 
     public BlogPost update(UUID id, BlogPostRequest req) {
         BlogPost existing = this.getById(id);
-        Author author = authorRepo.findById(req.authorId)
-                .orElseThrow(() -> new NotFoundException("Autore con id " + req.authorId + " non trovato"));
-        existing.setCategory(req.category);
-        existing.setTitle(req.title);
-        existing.setContent(req.content);
-        existing.setReadingTime(req.readingTime);
+
+        Author author = authorRepo.findById(req.getAuthorId())
+                .orElseThrow(() -> new NotFoundException("Autore con id " + req.getAuthorId() + " non trovato"));
+
+        existing.setTitle(req.getTitle());
+        existing.setContent(req.getContent());
+        existing.setCategory(req.getCategory());
+        existing.setReadingTime(req.getReadingTime());
         existing.setAuthor(author);
+
         return blogPostRepo.save(existing);
     }
 
